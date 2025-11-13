@@ -16,6 +16,16 @@ const io = new Server(server, {
 app.use(cors());
 app.use(express.json());
 
+// Connect to MongoDB
+const mongoose = require("mongoose");
+mongoose
+  .connect(process.env.MONGO_URI)
+  .then(() => console.log("MongoDB Connected"))
+  .catch((err) => console.error("MongoDB connection error:", err));
+
+// Routes
+app.use("/api/auth", require("./routes/auth"));
+
 app.get("/", (req, res) => {
   res.send("EcoTrack API Running");
 });
