@@ -16,6 +16,9 @@ const io = new Server(server, {
 app.use(cors());
 app.use(express.json());
 
+const cookieParser = require("cookie-parser");
+app.use(cookieParser());
+
 // Connect to MongoDB
 const mongoose = require("mongoose");
 mongoose

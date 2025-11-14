@@ -29,9 +29,16 @@ exports.register = async (req, res) => {
       expiresIn: "7d",
     });
 
+    // Set JWT cookie
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
+
+    // Send user back (no password, no token)
     res.status(201).json({
-      message: "User created",
-      token,
       user: {
         id: user._id,
         name: user.name,
@@ -65,9 +72,16 @@ exports.login = async (req, res) => {
       expiresIn: "7d",
     });
 
+    // Set JWT cookie
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
+    // Send user back
     res.json({
-      message: "Login successful",
-      token,
       user: {
         id: user._id,
         name: user.name,
@@ -76,5 +90,27 @@ exports.login = async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
+  }
+};
+
+// Get current user (requires cookie-based auth)
+exports.getMe = async (req, res) => {
+  try {
+    const token = req.cookies.token; // Read token from cookie
+
+    if (!token) {
+      return res.status(401).json({ message: "Not authorized" });
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    const user = await User.findById(decoded.id).select("-password");
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.json({ user });
+  } catch (error) {
+    res.status(401).json({ message: "Invalid token" });
   }
 };

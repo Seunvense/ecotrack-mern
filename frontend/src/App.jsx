@@ -1,44 +1,66 @@
-import { useEffect, useState } from "react";
+import { Routes, Route, Navigate } from "react-router-dom";
+import Register from "./pages/Register";
+import Login from "./pages/Login";
+import Dashboard from "./pages/Dashboard";
+import Navbar from "./components/Navbar";
+import { useState, useEffect } from "react";
 
 function App() {
-  const [message, setMessage] = useState("Loading...");
-  const [theme, setTheme] = useState("light");
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("http://localhost:5000")
-      .then((res) => res.text())
-      .then((data) => setMessage(data))
-      .catch(() => setMessage("Backend offline"));
+    const token = document.cookie
+      .split("; ")
+      .find((row) => row.startsWith("token="))
+      ?.split("=")[1];
+
+    if (token) {
+      // Verify token with backend
+      fetch("http://localhost:5000/api/auth/me", {
+        credentials: "include",
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.user) setUser(data.user);
+        })
+        .finally(() => setLoading(false));
+    } else {
+      setLoading(false);
+    }
   }, []);
 
-  const toggleTheme = () => {
-    const newTheme = theme === "light" ? "dark" : "light";
-    setTheme(newTheme);
-    document.documentElement.classList.toggle("dark");
-    localStorage.theme = newTheme;
-  };
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-green-50 dark:bg-gray-900">
+        <div className="animate-spin w-8 h-8 border-4 border-green-600 border-t-transparent rounded-full"></div>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-4">
-      <div className="w-full max-w-md bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 text-center">
-        <h1 className="text-3xl md:text-4xl font-bold text-green-700 dark:text-green-400 mb-3">
-          EcoTrack
-        </h1>
-        <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
-          {message}
-        </p>
-        <p className="text-xs text-gray-500 dark:text-gray-400">
-          SDG 13: Climate Action
-        </p>
-
-        <button
-          onClick={toggleTheme}
-          className="mt-6 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium transition"
-        >
-          {theme === "light" ? "🌙 Dark Mode" : "☀️ Light Mode"}
-        </button>
-      </div>
-    </div>
+    <>
+      <Navbar user={user} setUser={setUser} />
+      <Routes>
+        <Route path="/" element={<Navigate to="/login" />} />
+        <Route
+          path="/register"
+          element={
+            user ? <Navigate to="/dashboard" /> : <Register setUser={setUser} />
+          }
+        />
+        <Route
+          path="/login"
+          element={
+            user ? <Navigate to="/dashboard" /> : <Login setUser={setUser} />
+          }
+        />
+        <Route
+          path="/dashboard"
+          element={user ? <Dashboard user={user} /> : <Navigate to="/login" />}
+        />
+      </Routes>
+    </>
   );
 }
 
