@@ -6,18 +6,28 @@ require("dotenv").config();
 
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server, {
-  cors: {
-    origin: "http://localhost:5173",
-    methods: ["GET", "POST"],
-  },
-});
 
-app.use(cors());
+// --- FIXED CORS FOR FRONTEND <-> BACKEND ----
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+  })
+);
+
 app.use(express.json());
 
 const cookieParser = require("cookie-parser");
 app.use(cookieParser());
+
+// SOCKET.IO (this part was already correct)
+const io = new Server(server, {
+  cors: {
+    origin: "http://localhost:5173",
+    methods: ["GET", "POST"],
+    credentials: true,
+  },
+});
 
 // Connect to MongoDB
 const mongoose = require("mongoose");
@@ -33,6 +43,7 @@ app.get("/", (req, res) => {
   res.send("EcoTrack API Running");
 });
 
+// Socket events
 io.on("connection", (socket) => {
   console.log("User connected:", socket.id);
   socket.on("disconnect", () => {

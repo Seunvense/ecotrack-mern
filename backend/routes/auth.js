@@ -11,4 +11,10 @@ router.post("/register", register);
 // @route  POST /api/auth/login
 router.post("/login", login);
 
+router.get(
+  "/me",
+  require("../middleware/auth"),
+  require("../controllers/authController").getMe
+);
+
 module.exports = router;
