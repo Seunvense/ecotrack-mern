@@ -10,30 +10,35 @@ function App() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const token = document.cookie
-      .split("; ")
-      .find((row) => row.startsWith("token="))
-      ?.split("=")[1];
+    const checkAuth = async () => {
+      try {
+        const res = await fetch("http://localhost:5000/api/auth/me", {
+          credentials: "include",
+        });
 
-    if (token) {
-      // Verify token with backend
-      fetch("http://localhost:5000/api/auth/me", {
-        credentials: "include",
-      })
-        .then((res) => res.json())
-        .then((data) => {
-          if (data.user) setUser(data.user);
-        })
-        .finally(() => setLoading(false));
-    } else {
-      setLoading(false);
-    }
+        if (res.ok) {
+          const data = await res.json();
+          setUser(data.user);
+        }
+      } catch (err) {
+        console.log("Not authenticated");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkAuth();
   }, []);
 
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-green-50 dark:bg-gray-900">
-        <div className="animate-spin w-8 h-8 border-4 border-green-600 border-t-transparent rounded-full"></div>
+        <div className="text-center">
+          <div className="animate-spin w-12 h-12 border-4 border-green-600 border-t-transparent rounded-full mx-auto"></div>
+          <p className="mt-4 text-sm text-gray-600 dark:text-gray-400">
+            Checking authentication...
+          </p>
+        </div>
       </div>
     );
   }

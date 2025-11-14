@@ -1,10 +1,10 @@
 const jwt = require("jsonwebtoken");
 
-module.exports = (req, res, next) => {
+const protect = async (req, res, next) => {
   const token = req.cookies.token;
 
   if (!token) {
-    return res.status(401).json({ message: "No token, authorization denied" });
+    return res.status(401).json({ message: "Not authorized, no token" });
   }
 
   try {
@@ -12,6 +12,9 @@ module.exports = (req, res, next) => {
     req.user = decoded;
     next();
   } catch (err) {
-    res.status(401).json({ message: "Token is not valid" });
+    console.error("Token verification failed:", err.message);
+    return res.status(401).json({ message: "Not authorized, token failed" });
   }
 };
+
+module.exports = { protect };

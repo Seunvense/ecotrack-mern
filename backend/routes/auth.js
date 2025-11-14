@@ -1,20 +1,13 @@
 const express = require("express");
 const router = express.Router();
 const { register, login, getMe } = require("../controllers/authController");
+const { protect } = require("../middleware/auth");
 
-// ... existing routes
-router.get("/me", getMe);
-
-// @route  POST /api/auth/register
+// AUTH ROUTES
 router.post("/register", register);
-
-// @route  POST /api/auth/login
 router.post("/login", login);
 
-router.get(
-  "/me",
-  require("../middleware/auth"),
-  require("../controllers/authController").getMe
-);
+// PROTECTED ROUTE
+router.get("/me", protect, getMe);
 
 module.exports = router;
