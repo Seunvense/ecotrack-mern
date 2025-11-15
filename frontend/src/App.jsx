@@ -4,6 +4,7 @@ import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Navbar from "./components/Navbar";
 import { useState, useEffect } from "react";
+import LogActivity from "./pages/LogActivity";
 
 function App() {
   const [user, setUser] = useState(null);
@@ -63,6 +64,12 @@ function App() {
         <Route
           path="/dashboard"
           element={user ? <Dashboard user={user} /> : <Navigate to="/login" />}
+        />
+        <Route
+          path="/log"
+          element={
+            user ? <LogActivity user={user} /> : <Navigate to="/login" />
+          }
         />
       </Routes>
     </>

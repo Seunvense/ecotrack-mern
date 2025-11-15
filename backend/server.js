@@ -1,13 +1,12 @@
 const express = require("express");
-const http = require("http");
-const { Server } = require("socket.io");
 const cors = require("cors");
+const cookieParser = require("cookie-parser");
+const mongoose = require("mongoose");
 require("dotenv").config();
 
 const app = express();
-const server = http.createServer(app);
 
-// --- FIXED CORS FOR FRONTEND <-> BACKEND ----
+// --- FIX CORS ---
 app.use(
   cors({
     origin: "http://localhost:5173",
@@ -16,21 +15,9 @@ app.use(
 );
 
 app.use(express.json());
-
-const cookieParser = require("cookie-parser");
 app.use(cookieParser());
 
-// SOCKET.IO (this part was already correct)
-const io = new Server(server, {
-  cors: {
-    origin: "http://localhost:5173",
-    methods: ["GET", "POST"],
-    credentials: true,
-  },
-});
-
-// Connect to MongoDB
-const mongoose = require("mongoose");
+// Connect MongoDB
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => console.log("MongoDB Connected"))
@@ -38,10 +25,31 @@ mongoose
 
 // Routes
 app.use("/api/auth", require("./routes/auth"));
+app.use("/api/activities", require("./routes/activity"));
 
 app.get("/", (req, res) => {
   res.send("EcoTrack API Running");
 });
+
+// --- SOCKET.IO USING THE FORMAT YOU WANT ---
+const PORT = process.env.PORT || 5000;
+
+// Start server normally
+const server = app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
+
+// Attach socket.io AFTER server starts
+const io = require("socket.io")(server, {
+  cors: {
+    origin: "http://localhost:5173",
+    methods: ["GET", "POST"],
+    credentials: true,
+  },
+});
+
+// Make io available inside routes
+app.set("io", io);
 
 // Socket events
 io.on("connection", (socket) => {
@@ -49,9 +57,4 @@ io.on("connection", (socket) => {
   socket.on("disconnect", () => {
     console.log("User disconnected:", socket.id);
   });
-});
-
-const PORT = process.env.PORT || 5000;
-server.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
 });
