@@ -54,13 +54,17 @@ exports.logActivity = async (req, res) => {
     });
 
     // Emit to Socket.IO
-    const io = req.app.get("io");
+    // Emit carbon update to Socket.IO
     const updatedUser = await User.findById(userId).select("name carbonScore");
-    io.emit("carbonUpdate", {
-      userId,
-      name: updatedUser.name,
-      carbonScore: updatedUser.carbonScore,
-    });
+    const io = req.app.get("io");
+
+    if (updatedUser && io) {
+      io.emit("carbonUpdate", {
+        userId: updatedUser._id.toString(),
+        name: updatedUser.name,
+        carbonScore: updatedUser.carbonScore,
+      });
+    }
 
     res.status(201).json({
       message: "Activity logged",
@@ -80,6 +84,50 @@ exports.getActivities = async (req, res) => {
       .limit(10);
 
     res.json(activities);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Get Leaderboard
+exports.getLeaderboard = async (req, res) => {
+  try {
+    const leaderboard = await User.find()
+      .select("name carbonScore")
+      .sort({ carbonScore: -1 })
+      .limit(10);
+
+    res.json(
+      leaderboard.map((user, index) => ({
+        rank: index + 1,
+        name: user.name,
+        carbonScore: user.carbonScore,
+      }))
+    );
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Reset User Footprint
+exports.resetFootprint = async (req, res) => {
+  try {
+    await User.findByIdAndUpdate(req.user.id, { carbonScore: 0 });
+    await Activity.deleteMany({ user: req.user.id });
+
+    const io = req.app.get("io");
+    const updatedUser = await User.findById(req.user.id).select(
+      "name carbonScore"
+    );
+    if (io && updatedUser) {
+      io.emit("carbonUpdate", {
+        userId: updatedUser._id.toString(),
+        name: updatedUser.name,
+        carbonScore: 0,
+      });
+    }
+
+    res.json({ message: "Footprint reset" });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
