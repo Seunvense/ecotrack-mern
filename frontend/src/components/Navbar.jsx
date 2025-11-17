@@ -1,10 +1,18 @@
 import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
 
 export default function Navbar({ user, setUser }) {
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
+  const handleLogout = async () => {
+    await axios.post(
+      "http://localhost:5000/api/auth/logout",
+      {},
+      {
+        withCredentials: true,
+      }
+    );
+
     setUser(null);
     navigate("/login");
   };

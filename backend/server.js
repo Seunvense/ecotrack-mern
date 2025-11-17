@@ -9,7 +9,8 @@ const app = express();
 // --- FIX CORS ---
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: process.env.CLIENT_URL,
+    methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
   })
 );
@@ -34,21 +35,19 @@ app.get("/", (req, res) => {
 // --- SOCKET.IO USING THE FORMAT YOU WANT ---
 const PORT = process.env.PORT || 5000;
 
-// Start server normally
 const server = app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
 
-// Attach socket.io AFTER server starts
+// Socket.IO
 const io = require("socket.io")(server, {
   cors: {
-    origin: "http://localhost:5173",
+    origin: process.env.CLIENT_URL || "https://ecotrack-mern.vercel.app",
     methods: ["GET", "POST"],
     credentials: true,
   },
 });
 
-// Make io available inside routes
 app.set("io", io);
 
 // Socket events
