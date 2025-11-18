@@ -34,7 +34,7 @@ export default function LogActivity({ user }) {
     e.preventDefault();
     try {
       const res = await axios.post(
-        "http://localhost:5000/api/activities",
+        "https://ecotrack-mern.onrender.com/api/activities",
         {
           type,
           category,

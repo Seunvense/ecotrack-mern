@@ -19,10 +19,12 @@ export default function Dashboard({ user }) {
     const fetchData = async () => {
       try {
         const [actRes, leaderRes] = await Promise.all([
-          axios.get("http://localhost:5000/api/activities", {
+          axios.get("https://ecotrack-mern.onrender.com/api/activities", {
             withCredentials: true,
           }),
-          axios.get("http://localhost:5000/api/activities/leaderboard"),
+          axios.get(
+            "https://ecotrack-mern.onrender.com/api/activities/leaderboard"
+          ),
         ]);
 
         const activities = actRes.data;
@@ -51,7 +53,7 @@ export default function Dashboard({ user }) {
 
   // Socket.IO live update
   useEffect(() => {
-    socket = io("http://localhost:5000", {
+    socket = io("https://ecotrack-mern.onrender.com", {
       withCredentials: true,
     });
 
@@ -131,7 +133,7 @@ export default function Dashboard({ user }) {
             onClick={async () => {
               if (window.confirm("Reset your carbon footprint to 0?")) {
                 await axios.delete(
-                  "http://localhost:5000/api/activities/reset",
+                  "https://ecotrack-mern.onrender.com/api/activities/reset",
                   {
                     withCredentials: true,
                   }

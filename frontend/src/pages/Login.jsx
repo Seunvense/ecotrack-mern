@@ -3,9 +3,11 @@ import axios from "axios";
 
 export default function Login({ setUser }) {
   const handleLogin = async (data) => {
-    const res = await axios.post("http://localhost:5000/api/auth/login", data, {
-      withCredentials: true,
-    });
+    const res = await axios.post(
+      "https://ecotrack-mern.onrender.com/api/auth/login",
+      data,
+      { withCredentials: true }
+    );
     setUser(res.data.user);
   };
 

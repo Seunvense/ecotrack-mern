@@ -4,11 +4,9 @@ import axios from "axios";
 export default function Register({ setUser }) {
   const handleRegister = async (data) => {
     const res = await axios.post(
-      "http://localhost:5000/api/auth/register",
+      "https://ecotrack-mern.onrender.com/api/auth/register",
       data,
-      {
-        withCredentials: true,
-      }
+      { withCredentials: true }
     );
     setUser(res.data.user);
   };

@@ -6,7 +6,7 @@ export default function Navbar({ user, setUser }) {
 
   const handleLogout = async () => {
     await axios.post(
-      "http://localhost:5000/api/auth/logout",
+      "https://ecotrack-mern.onrender.com/api/auth/logout",
       {},
       {
         withCredentials: true,
