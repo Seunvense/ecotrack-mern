@@ -9,12 +9,10 @@ const app = express();
 // --- FIX CORS ---
 app.use(
   cors({
-    origin: [
-      process.env.CLIENT_URL, // Vercel
-      "http://localhost:5173", // Local dev
-    ],
-    methods: ["GET", "POST", "PUT", "DELETE"],
+    origin: ["https://ecotrack-mern.vercel.app", "http://localhost:5173"],
     credentials: true,
+    allowedHeaders: ["Content-Type", "Authorization"],
+    methods: ["GET", "POST", "PUT", "DELETE"],
   })
 );
 
@@ -44,13 +42,12 @@ const server = app.listen(PORT, () => {
 
 const io = require("socket.io")(server, {
   cors: {
-    origin: [process.env.CLIENT_URL, "http://localhost:5173"],
+    origin: ["https://ecotrack-mern.vercel.app", "http://localhost:5173"],
     methods: ["GET", "POST"],
     credentials: true,
   },
 });
-
-app.set("io", io);
++app.set("io", io);
 
 // Socket events
 io.on("connection", (socket) => {
