@@ -23,7 +23,10 @@ export default function Dashboard({ user }) {
             withCredentials: true,
           }),
           axios.get(
-            "https://ecotrack-mern.onrender.com/api/activities/leaderboard"
+            "https://ecotrack-mern.onrender.com/api/activities/leaderboard",
+            {
+              withCredentials: true,
+            }
           ),
         ]);
 
